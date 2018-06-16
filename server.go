@@ -105,7 +105,11 @@ func (s *Server) join(join Join) {
 		userSet.OnLastConnection(func(){
 			delete(s.users, join.user.Id())
 		})
+		s.users[join.user.Id()] = userSet
+	}else{
+		userSet.AddUser(join.user)
 	}
+	s.onlineConnection += 1
 	for _, channel := range *join.channels {
 		pushChannel, ok := s.channels[channel]
 		if ok {
@@ -120,8 +124,6 @@ func (s *Server) join(join Join) {
 			}(channel))
 		}
 	}
-	s.onlineConnection += 1
-	s.users[join.user.Id()] = userSet
 }
 
 func (s *Server) leave(leave Leave) {

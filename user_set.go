@@ -12,6 +12,10 @@ func NewUserSet(user User) *UserSet {
 	return set
 }
 
+func (set *UserSet) AddUser(user User) {
+	set.users[user] = user
+}
+
 func (set *UserSet) Size() int {
 	return len(set.users)
 }
