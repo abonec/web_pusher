@@ -7,4 +7,3 @@ type Connection interface {
 
 type connection struct {
 }
-

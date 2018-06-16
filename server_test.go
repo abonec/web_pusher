@@ -3,10 +3,10 @@ package web_pusher
 import (
 	"testing"
 	//_ "github.com/stretchr/testify/"
-	"github.com/stretchr/testify/assert"
-	_ "github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/mock"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	_ "github.com/stretchr/testify/mock"
 )
 
 type testApp struct {
@@ -14,11 +14,9 @@ type testApp struct {
 }
 
 type testConn struct {
-	//mock.Mock
 }
 
 type testUser struct {
-	//mock.Mock
 	id string
 }
 
@@ -57,11 +55,14 @@ func TestServer_Auth(t *testing.T) {
 	server.Start()
 	user, err := server.Auth(&testConn{}, []byte("valid"))
 	assert.NoError(err)
-	assert.Equal(server.users[testUserId].Id(), testUserId)
-	u, err := server.channels[mainChannel].GetUser(testUserId)
+	assert.Equal(server.users[testUserId].Size(), 1)
+	assert.Equal(server.OnlineConnections(), 1)
+	assert.Equal(server.OnlineUsers(), 1)
+	set, err := server.channels[mainChannel].GetUserSet(testUserId)
 	assert.NoError(err)
-	assert.Equal(u.Id(), testUserId)
+	assert.Equal(set.id, testUserId)
 	server.Close(user)
 	assert.Zero(len(server.channels))
-	assert.Zero(len(server.users))
+	assert.Zero(server.OnlineUsers())
+	assert.Zero(server.OnlineConnections())
 }

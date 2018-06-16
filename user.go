@@ -5,11 +5,11 @@ type User interface {
 }
 
 type user struct {
-	id string
+	id   string
 	conn Connection
 }
 
-func(u *user) Id() string {
+func (u *user) Id() string {
 	return u.id
 }
 

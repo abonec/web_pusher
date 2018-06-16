@@ -1,39 +1,45 @@
 package web_pusher
 
-import "errors"
+import (
+	"errors"
+)
 
 type PushChannel interface {
 	Id() string
-	AddUser(user User)
-	RemoveUser(userId string) bool
-	GetUser(id string) (User, error)
+	AddUserSet(set *UserSet)
+	GetUserSet(id string) (*UserSet, error)
+	OnLastUser(callback func())
 }
 
 type pushChannel struct {
-	id    string
-	users map[string]User
+	id               string
+	users            map[string]*UserSet
+	lastUserCallback func()
 }
 
 func (ch *pushChannel) Id() string {
 	return ch.id
 }
 
-func (ch *pushChannel) AddUser(user User) {
-	ch.users[user.Id()] = user
-}
-
-func (ch *pushChannel) RemoveUser(userId string) bool {
-	delete(ch.users, userId)
-	if len(ch.users) == 0 {
-		return true
+func (ch *pushChannel) AddUserSet(set *UserSet) {
+	if _, present := ch.users[set.id]; present {
+		return
 	} else {
-		return false
+		ch.users[set.id] = set
 	}
+	set.OnLastConnection(func() {
+		delete(ch.users, set.id)
+		if len(ch.users) == 0 {
+			if ch.lastUserCallback != nil {
+				ch.lastUserCallback()
+			}
+		}
+	})
 }
 
 var UserNotFound = errors.New("user not found")
 
-func (ch *pushChannel) GetUser(id string) (User, error) {
+func (ch *pushChannel) GetUserSet(id string) (*UserSet, error) {
 	user, ok := ch.users[id]
 	if ok {
 		return user, nil
@@ -42,10 +48,14 @@ func (ch *pushChannel) GetUser(id string) (User, error) {
 	}
 }
 
-func NewPushChannel(firstUser User) PushChannel {
+func (ch *pushChannel) OnLastUser(callback func()) {
+	ch.lastUserCallback = callback
+}
+
+func NewPushChannel(firstUser *UserSet) PushChannel {
 	channel := &pushChannel{
-		users: make(map[string]User),
+		users: make(map[string]*UserSet),
 	}
-	channel.AddUser(firstUser)
+	channel.AddUserSet(firstUser)
 	return channel
 }
