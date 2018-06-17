@@ -19,6 +19,11 @@ func (set *UserSet) AddUser(user User) {
 func (set *UserSet) Size() int {
 	return len(set.users)
 }
+func (set *UserSet) Send(msg []byte) {
+	for _, user := range set.users {
+		user.Send(msg)
+	}
+}
 
 func (set *UserSet) DeleteUser(user User) {
 	delete(set.users, user)

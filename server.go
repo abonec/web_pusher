@@ -7,8 +7,9 @@ import (
 )
 
 type Application interface {
-	Auth(msg []byte) (User, []string, error)
+	Auth(msg []byte) (AuthUser, []string, error)
 }
+
 
 type Join struct {
 	user     User
@@ -50,6 +51,9 @@ func (s *Server) OnlineConnections() int {
 }
 
 func (s *Server) sendToUser(userId string, msg []byte) {
+	if user, ok := s.users[userId]; ok {
+		user.Send(msg)
+	}
 }
 
 func (s *Server) sendToChannel(channelId string, msg []byte) {
@@ -102,11 +106,11 @@ func (s *Server) join(join Join) {
 	userSet, ok := s.users[join.user.Id()]
 	if !ok {
 		userSet = NewUserSet(join.user)
-		userSet.OnLastConnection(func(){
+		userSet.OnLastConnection(func() {
 			delete(s.users, join.user.Id())
 		})
 		s.users[join.user.Id()] = userSet
-	}else{
+	} else {
 		userSet.AddUser(join.user)
 	}
 	s.onlineConnection += 1
