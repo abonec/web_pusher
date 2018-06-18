@@ -3,19 +3,21 @@ package web_pusher
 import (
 	"net/http"
 	"github.com/gorilla/websocket"
-	"log"
 )
 
 type Frontend struct {
 	server *Server
+	logger Logger
 }
 
 type WebSocketConnection struct {
-	conn *websocket.Conn
+	conn     *websocket.Conn
+	frontend *Frontend
+	user     User
 }
 
-func NewFrontend(server *Server) *Frontend {
-	return &Frontend{server}
+func NewFrontend(server *Server, logger Logger) *Frontend {
+	return &Frontend{server, logger}
 }
 
 var upgrader = websocket.Upgrader{
@@ -25,49 +27,64 @@ var upgrader = websocket.Upgrader{
 }
 
 func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
+	front.logf(VERBOSE_LOGGING, "Incoming connection %s\n", r.RemoteAddr)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("upgrade error:", err)
+		front.logf(VERBOSE_LOGGING, "Upgrade error for %s: %s\n", r.RemoteAddr, err.Error())
 		return
 	}
 	defer conn.Close()
+	front.logf(VERBOSE_LOGGING, "Upgrade successful")
 
 	_, message, err := conn.ReadMessage()
 	if err != nil {
-		log.Println("error while authenticating", err)
+		front.logf(VERBOSE_LOGGING, "Error while reading auth message: %s", err.Error())
 		return
 	}
 
-	_, err = front.server.Auth(NewWebSocketConnection(conn), message)
+	ws := NewWebSocketConnection(conn, front)
+	u, err := front.server.Auth(ws, message)
 	if err != nil {
 		msg, err := NewFrontendErrorMessage(AuthError, err).toJSON()
 		if err != nil {
 			return
 		}
 		conn.WriteMessage(websocket.TextMessage, msg)
+		front.logf(VERBOSE_LOGGING, "Error while authentication: %s", msg)
 		return
 	}
+	ws.user = u
+	front.logf(VERBOSE_LOGGING, "Authentication successful for user id #%s", u.Id())
+	conn.SetCloseHandler(func(code int, text string) error {
+		front.server.Close(u)
+		front.logf(VERBOSE_LOGGING, "Connection for #%s(%s) was closed", u.Id(), conn.RemoteAddr())
+		return nil
+	})
 
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("error while read message:", err)
 			break
 		}
 
 		err = conn.WriteMessage(mt, message)
 		if err != nil {
-			log.Println("error while send message:", err)
+			break
 		}
 	}
 }
 
-func NewWebSocketConnection(conn *websocket.Conn) *WebSocketConnection {
-	return &WebSocketConnection{conn}
+func (front *Frontend) logf(logLevel int, format string, v ...interface{}) {
+	front.logger.Printf("[FRON] "+format, v...)
+}
+
+func NewWebSocketConnection(conn *websocket.Conn, frontend *Frontend) *WebSocketConnection {
+	return &WebSocketConnection{conn: conn, frontend: frontend}
 }
 
 func (conn *WebSocketConnection) Send(msg []byte) bool {
 	conn.conn.WriteMessage(websocket.TextMessage, msg)
+	conn.frontend.logf(VERBOSE_LOGGING, "Send %s to %s(%s)", msg, conn.user.Id(), conn.conn.RemoteAddr())
 	return true
 }
 func (conn *WebSocketConnection) Close(msg []byte) {

@@ -2,6 +2,9 @@ package web_pusher
 
 import "log"
 
+const (
+	VERBOSE_LOGGING = 1
+)
 type Logger interface {
 	Printf(format string, v ...interface{})
 }
