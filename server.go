@@ -6,10 +6,13 @@ import (
 	_ "github.com/stretchr/objx"
 )
 
+var (
+	EmailBlankError = errors.New("email blank")
+)
+
 type Application interface {
 	Auth(msg []byte) (AuthUser, []string, error)
 }
-
 
 type Join struct {
 	user     User

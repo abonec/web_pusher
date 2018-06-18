@@ -18,7 +18,11 @@ func NewFrontend(server *Server) *Frontend {
 	return &Frontend{server}
 }
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -36,7 +40,11 @@ func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 
 	_, err = front.server.Auth(NewWebSocketConnection(conn), message)
 	if err != nil {
-		log.Println("error while auth:", err)
+		msg, err := NewFrontendErrorMessage(AuthError, err).toJSON()
+		if err != nil {
+			return
+		}
+		conn.WriteMessage(websocket.TextMessage, msg)
 		return
 	}
 

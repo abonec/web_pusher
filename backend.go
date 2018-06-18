@@ -6,10 +6,6 @@ import (
 	"bytes"
 )
 
-type Backend interface {
-	Listen()
-}
-
 type backend struct {
 	server *Server
 }
@@ -18,12 +14,7 @@ func NewBackend(server *Server) *backend {
 	return &backend{server}
 }
 
-func (b *backend) Listen() {
-	http.HandleFunc("/send-to-user", b.sendToUser)
-	http.HandleFunc("/send-to-channel", b.sendToChannel)
-}
-
-func (b *backend) sendToUser(rw http.ResponseWriter, r *http.Request) {
+func (b *backend) SendToUser(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	userId := strings.Split(r.URL.Path, "/")[2]
 	buf := new(bytes.Buffer)
@@ -37,5 +28,5 @@ func (b *backend) sendToUser(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (b *backend) sendToChannel(rw http.ResponseWriter, r *http.Request) {
+func (b *backend) SendToChannel(rw http.ResponseWriter, r *http.Request) {
 }
