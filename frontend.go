@@ -48,16 +48,13 @@ func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 	ws := NewWebSocketConnection(conn, front)
 	u, err := front.server.Auth(ws, message)
 	if err != nil {
-		msg, err := NewFrontendErrorMessage(AuthError, err).toJSON()
-		if err != nil {
-			return
-		}
-		conn.WriteMessage(websocket.TextMessage, msg)
-		front.logf(VERBOSE_LOGGING, "Error while authentication: %s", msg)
+		conn.WriteJSON(NewFrontendErrorMessage(AuthError, err))
+		front.logf(VERBOSE_LOGGING, "Error while authentication: %s", err.Error())
 		return
 	}
 	ws.user = u
 	front.logf(VERBOSE_LOGGING, "Authentication successful for user id #%s", u.Id())
+	conn.WriteJSON(NewFrontendSuccessMessage(u.Id()))
 	conn.SetCloseHandler(func(code int, text string) error {
 		front.server.Close(u)
 		front.logf(VERBOSE_LOGGING, "Connection for #%s(%s) was closed", u.Id(), conn.RemoteAddr())
