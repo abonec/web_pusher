@@ -122,7 +122,7 @@ func (s *Server) join(join Join) {
 		if ok {
 			pushChannel.AddUserSet(userSet)
 		} else {
-			pushChannel = NewPushChannel(userSet)
+			pushChannel = NewPushChannel(channel, userSet)
 			s.channels[channel] = pushChannel
 			pushChannel.OnLastUser(func(ch string) func() {
 				return func() {

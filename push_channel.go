@@ -52,8 +52,9 @@ func (ch *pushChannel) OnLastUser(callback func()) {
 	ch.lastUserCallback = callback
 }
 
-func NewPushChannel(firstUser *UserSet) PushChannel {
+func NewPushChannel(id string, firstUser *UserSet) PushChannel {
 	channel := &pushChannel{
+		id:    id,
 		users: make(map[string]*UserSet),
 	}
 	channel.AddUserSet(firstUser)
