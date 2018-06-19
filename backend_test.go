@@ -13,18 +13,18 @@ func TestBackend_sendToUser(t *testing.T) {
 	server := NewServer(newTestApp())
 	server.Start()
 	assert.NotNil(1)
-	backend := NewBackend(server)
+	backend := NewBackend(server, nil)
 
 
 	req := newSendToUserRequest(t, "testUser", []byte{})
 	rr := httptest.NewRecorder()
 
-	backend.sendToUser(rr, req)
+	backend.SendToUser(rr, req)
 	assert.Equal(rr.Code, http.StatusBadRequest)
 
 	req = newSendToUserRequest(t, "testUser", []byte("{}"))
 	rr = httptest.NewRecorder()
-	backend.sendToUser(rr, req)
+	backend.SendToUser(rr, req)
 	assert.Equal(rr.Code, http.StatusOK)
 
 	testConn := &testConn{}
@@ -35,9 +35,9 @@ func TestBackend_sendToUser(t *testing.T) {
 	msg := []byte("{}")
 	testConn.On("Send", msg)
 	rr = httptest.NewRecorder()
-	backend.sendToUser(rr, newSendToUserRequest(t, "testUser", msg))
+	backend.SendToUser(rr, newSendToUserRequest(t, "testUser", msg))
 	server.Close(conn)
-	backend.sendToUser(rr, newSendToUserRequest(t, "testUser", msg))
+	backend.SendToUser(rr, newSendToUserRequest(t, "testUser", msg))
 	testConn.AssertNumberOfCalls(t, "Send", 1)
 	testConn.AssertCalled(t, "Send", msg)
 }

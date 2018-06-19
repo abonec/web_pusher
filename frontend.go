@@ -17,6 +17,9 @@ type WebSocketConnection struct {
 }
 
 func NewFrontend(server *Server, logger Logger) *Frontend {
+	if logger == nil {
+		logger = NopeLogger{}
+	}
 	return &Frontend{server, logger}
 }
 

@@ -13,6 +13,9 @@ type backend struct {
 }
 
 func NewBackend(server *Server, logger Logger) *backend {
+	if logger == nil {
+		logger = NopeLogger{}
+	}
 	return &backend{server, logger}
 }
 
