@@ -38,7 +38,7 @@ func newFrontendServer(assert *assert.Assertions) *testServer {
 
 var testDialer = websocket.Dialer{}
 
-func TestAuthFrontend(t *testing.T) {
+func TestSuccessAuth(t *testing.T) {
 	assert := assert.New(t)
 	server := newFrontendServer(assert)
 
@@ -48,12 +48,32 @@ func TestAuthFrontend(t *testing.T) {
 
 	err = ws.WriteMessage(websocket.TextMessage, []byte("valid"))
 	assert.NoError(err)
-	ws.ReadMessage()
+	var msg FrontendMessage
+	err = ws.ReadJSON(&msg)
+	assert.NoError(err)
+	assert.Equal("auth", msg.MsgType)
+	assert.Equal("success", msg.AuthStatus)
 	assert.Equal(1, server.appServer.OnlineUsers())
 	err = ws.WriteMessage(websocket.CloseMessage, []byte{})
 	assert.NoError(err)
 	ws.ReadMessage()
 	assert.Equal(0, server.appServer.OnlineUsers())
+}
+
+func TestFailureAuth(t *testing.T) {
+	assert := assert.New(t)
+	server := newFrontendServer(assert)
+
+	ws, _, err := testDialer.Dial(server.URL, http.Header{})
+	assert.NoError(err)
+	defer ws.Close()
+	err = ws.WriteMessage(websocket.TextMessage, []byte("invalid"))
+	assert.NoError(err)
+	var msg FrontendMessage
+	err = ws.ReadJSON(&msg)
+	assert.NoError(err)
+	assert.Equal("auth", msg.MsgType)
+	assert.Equal("failure", msg.AuthStatus)
 }
 
 func makeWsProto(s string) string {
