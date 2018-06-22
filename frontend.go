@@ -3,6 +3,7 @@ package web_pusher
 import (
 	"net/http"
 	"github.com/gorilla/websocket"
+	"time"
 )
 
 type Frontend struct {
@@ -39,11 +40,13 @@ func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	front.logf(VERBOSE_LOGGING, "Upgrade successful")
 
+	conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	_, message, err := conn.ReadMessage()
 	if err != nil {
 		front.logf(VERBOSE_LOGGING, "Error while reading auth message: %s", err.Error())
 		return
 	}
+	conn.SetReadDeadline(time.Time{})
 
 	ws := NewWebSocketConnection(conn, front)
 	u, err := front.server.Auth(ws, message)
