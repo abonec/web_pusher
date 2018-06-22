@@ -36,7 +36,6 @@ func newFrontendServer(assert *assert.Assertions) *testServer {
 	return testSrv
 }
 
-
 var testDialer = websocket.Dialer{}
 
 func TestHttpRequest(t *testing.T) {
@@ -70,6 +69,17 @@ func TestFailureAuth(t *testing.T) {
 
 	assert.Equal("auth", msg.MsgType)
 	assert.Equal("failure", msg.AuthStatus)
+}
+
+func TestSendMessages(t *testing.T) {
+	assert := assert.New(t)
+	server, ws, _ := AuthInFrontend(assert, "valid")
+
+	msg := []byte("test message")
+	server.appServer.sendToUser(testUserId, msg)
+	_, receivedMsg, err := ws.ReadMessage()
+	assert.NoError(err)
+	assert.Equal(msg, receivedMsg, "User have to receive exactly the same message as it was sent")
 }
 
 func AuthInFrontend(assert *assert.Assertions, authMessage string) (*testServer, *websocket.Conn, FrontendMessage) {
