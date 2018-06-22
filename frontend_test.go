@@ -36,7 +36,18 @@ func newFrontendServer(assert *assert.Assertions) *testServer {
 	return testSrv
 }
 
+
 var testDialer = websocket.Dialer{}
+
+func TestHttpRequest(t *testing.T) {
+	assert := assert.New(t)
+	server := newFrontendServer(assert)
+
+	resp, err := http.Get(strings.Replace(server.URL, "ws", "http", -1))
+	assert.Nil(err)
+	assert.Equal(http.StatusBadRequest, resp.StatusCode)
+
+}
 
 func TestSuccessAuth(t *testing.T) {
 	assert := assert.New(t)
