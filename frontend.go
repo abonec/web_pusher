@@ -30,6 +30,11 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Handler accepts websocket connections.
+// First message will be dispatched to the app Auth method.
+// In case of failure auth connection will be closed.
+// In case of auth message will not be sent in 5 seconds after establish connection it will be closed.
+// All further incoming messages will be ignored.
 func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 	front.logf(VERBOSE_LOGGING, "Incoming connection %s\n", r.RemoteAddr)
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -80,11 +85,12 @@ func NewWebSocketConnection(conn *websocket.Conn, frontend *Frontend) *WebSocket
 	return &WebSocketConnection{conn: conn, frontend: frontend}
 }
 
+// Send message to the client as is
 func (conn *WebSocketConnection) Send(msg []byte) bool {
 	conn.conn.WriteMessage(websocket.TextMessage, msg)
 	conn.frontend.logf(VERBOSE_LOGGING, "Send %s to %s(%s)", msg, conn.user.Id(), conn.conn.RemoteAddr())
 	return true
 }
-func (conn *WebSocketConnection) Close(msg []byte) {
 
+func (conn *WebSocketConnection) Close(msg []byte) {
 }

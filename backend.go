@@ -19,6 +19,7 @@ func NewBackend(server *Server, logger Logger) *backend {
 	return &backend{server, logger}
 }
 
+// Handler accepts request with POST body that would be sent to the given client as is
 func (b *backend) SendToUser(rw http.ResponseWriter, r *http.Request) {
 	var statusCode int
 	defer b.completeLog(time.Now(), &statusCode)
