@@ -53,21 +53,16 @@ func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ws.user = u
-	front.logf(VERBOSE_LOGGING, "Authentication successful for user id #%s", u.Id())
+	front.logf(VERBOSE_LOGGING, "Authentication successful for user id #%s, online %d/%d", u.Id(), front.server.OnlineUsers(), front.server.OnlineConnections())
 	conn.WriteJSON(NewFrontendSuccessMessage(u.Id()))
 	conn.SetCloseHandler(func(code int, text string) error {
 		front.server.Close(u)
-		front.logf(VERBOSE_LOGGING, "Connection for #%s(%s) was closed", u.Id(), conn.RemoteAddr())
+		front.logf(VERBOSE_LOGGING, "Connection for #%s(%s) was closed, online %d/%d", u.Id(), conn.RemoteAddr(), front.server.OnlineUsers(), front.server.OnlineConnections())
 		return nil
 	})
 
 	for {
-		mt, message, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
-
-		err = conn.WriteMessage(mt, message)
+		_, _, err := conn.ReadMessage()
 		if err != nil {
 			break
 		}
