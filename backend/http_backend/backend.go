@@ -5,17 +5,19 @@ import (
 	"strings"
 	"bytes"
 	"time"
-	"github.com/abonec/web_pusher/logger/stdout_logger"
+	"github.com/abonec/web_pusher"
+	"github.com/abonec/web_pusher/logger"
+	"github.com/abonec/web_pusher/logger/nope_logger"
 )
 
 type backend struct {
-	server *Server
-	logger Logger
+	server *web_pusher.Server
+	logger logger.Logger
 }
 
-func NewBackend(server *Server, logger Logger) *backend {
+func NewBackend(server *web_pusher.Server, logger logger.Logger) *backend {
 	if logger == nil {
-		logger = stdout_logger.NopeLogger{}
+		logger = nope_logger.NopeLogger{}
 	}
 	return &backend{server, logger}
 }

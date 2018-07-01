@@ -1,15 +1,16 @@
-package web_pusher
+package test_app
 
 import (
 	"github.com/stretchr/testify/mock"
 	"errors"
+	"github.com/abonec/web_pusher/application"
 )
 
 type testApp struct {
 	mock.Mock
 }
 
-type testConn struct {
+type TestConn struct {
 	mock.Mock
 }
 
@@ -21,20 +22,20 @@ func (u *testUser) Id() string {
 	return u.id
 }
 
-func (c *testConn) Send(msg []byte) bool {
+func (c *TestConn) Send(msg []byte) bool {
 	c.Called(msg)
 	return true
 }
-func (c *testConn) Close(msg []byte) {
+func (c *TestConn) Close(msg []byte) {
 	//c.Called(msg)
 }
 
-const testUserId = "testUser"
-const mainChannel = "main"
+const TestUserId = "testUser"
+const MainChannel = "main"
 
 var notFound = errors.New("not found")
 
-func (app *testApp) Auth(msg []byte) (AuthUser, []string, error) {
+func (app *testApp) Auth(msg []byte) (application.AuthUser, []string, error) {
 	args := app.Called(msg)
 	u := args.Get(0)
 	ch := args.Get(1)
@@ -49,9 +50,9 @@ func (app *testApp) Auth(msg []byte) (AuthUser, []string, error) {
 	return &user, channels, args.Error(2)
 }
 
-func newTestApp() *testApp {
+func NewTestApp() *testApp {
 	app := &testApp{}
-	app.On("Auth", []byte("valid")).Return(testUser{id: testUserId}, []string{mainChannel}, nil)
+	app.On("Auth", []byte("valid")).Return(testUser{id: TestUserId}, []string{MainChannel}, nil)
 	app.On("Auth", []byte("invalid")).Return(nil, nil, notFound)
 	return app
 }

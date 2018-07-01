@@ -7,6 +7,8 @@ import (
 	"testing"
 	"github.com/gorilla/websocket"
 	"strings"
+	"github.com/abonec/web_pusher"
+	"github.com/abonec/web_pusher/test_app"
 )
 
 type testHandler struct {
@@ -16,7 +18,7 @@ type testHandler struct {
 type testServer struct {
 	*httptest.Server
 	url       string
-	appServer *Server
+	appServer *web_pusher.Server
 }
 
 func (h *testHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -25,8 +27,8 @@ func (h *testHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func newFrontendServer(assert *assert.Assertions) *testServer {
 	testSrv := &testServer{}
-	app := newTestApp()
-	appServer := NewServer(app)
+	app := test_app.NewTestApp()
+	appServer := web_pusher.NewServer(app)
 	err := appServer.Start()
 	assert.NoError(err)
 	front := NewFrontend(appServer, nil)
@@ -76,7 +78,7 @@ func TestSendMessages(t *testing.T) {
 	server, ws, _ := AuthInFrontend(assert, "valid")
 
 	msg := []byte("test message")
-	server.appServer.sendToUser(testUserId, msg)
+	server.appServer.SendToUser(test_app.TestUserId, msg)
 	_, receivedMsg, err := ws.ReadMessage()
 	assert.NoError(err)
 	assert.Equal(msg, receivedMsg, "User have to receive exactly the same message as it was sent")

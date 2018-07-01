@@ -1,10 +1,12 @@
 package main
 
-import "github.com/abonec/web_pusher"
+import (
+	"github.com/abonec/web_pusher/application"
+)
 
 type App struct {
 }
 
-func (app *App) Auth(msg []byte) (web_pusher.AuthUser, []string, error) {
+func (app *App) Auth(msg []byte) (application.AuthUser, []string, error) {
 	return NewUser(), []string{"main"}, nil
 }

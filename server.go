@@ -4,29 +4,26 @@ import (
 	"errors"
 	_ "github.com/gorilla/websocket"
 	_ "github.com/stretchr/objx"
+	"github.com/abonec/web_pusher/application"
 )
 
 var (
 	EmailBlankError = errors.New("email blank")
 )
 
-type Application interface {
-	Auth(msg []byte) (AuthUser, []string, error)
-}
-
 type Join struct {
-	user     User
+	user     application.User
 	channels *[]string
 	result   chan interface{}
 }
 type Leave struct {
-	user   User
+	user   application.User
 	result chan interface{}
 }
 
 type Server struct {
 	initialized      bool
-	app              Application
+	app              application.Application
 	users            map[string]*UserSet
 	channels         map[string]PushChannel
 	joins            chan Join
@@ -34,7 +31,7 @@ type Server struct {
 	onlineConnection int
 }
 
-func NewServer(app Application) *Server {
+func NewServer(app application.Application) *Server {
 	return &Server{
 		initialized: true,
 		app:         app,
@@ -65,7 +62,7 @@ func (s *Server) sendToChannel(channelId string, msg []byte) {
 func (s *Server) SendById(id string) {
 }
 
-func (s *Server) Auth(conn Connection, msg []byte) (User, error) {
+func (s *Server) Auth(conn Connection, msg []byte) (application.User, error) {
 	u, channels, err := s.app.Auth(msg)
 	if err != nil {
 		conn.Close(nil)
@@ -80,7 +77,7 @@ func (s *Server) Auth(conn Connection, msg []byte) (User, error) {
 	return user, nil
 }
 
-func (s *Server) Close(user User) {
+func (s *Server) Close(user application.User) {
 	result := make(chan interface{})
 	s.leaves <- Leave{user, result}
 	<-result
@@ -140,3 +137,22 @@ func (s *Server) leave(leave Leave) {
 	}
 	s.onlineConnection -= 1
 }
+
+func (u *user) Id() string {
+	return u.id
+}
+
+func (u *user) Send(msg []byte) bool {
+	u.conn.Send(msg)
+	return true
+}
+
+type user struct {
+	id   string
+	conn Connection
+}
+
+func NewUser(id string, conn Connection) *user {
+	return &user{id, conn}
+}
+

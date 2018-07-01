@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"bytes"
+	"github.com/abonec/web_pusher"
+	"github.com/abonec/web_pusher/test_app"
 )
 
 func TestBackend_sendToUser(t *testing.T) {
 	assert := assert.New(t)
-	server := NewServer(newTestApp())
+	server := web_pusher.NewServer(test_app.NewTestApp())
 	server.Start()
 	assert.NotNil(1)
 	backend := NewBackend(server, nil)
@@ -27,7 +29,7 @@ func TestBackend_sendToUser(t *testing.T) {
 	backend.SendToUser(rr, req)
 	assert.Equal(rr.Code, http.StatusOK)
 
-	testConn := &testConn{}
+	testConn := &test_app.TestConn{}
 	conn, err := server.Auth(testConn, []byte("valid"))
 	assert.NotNil(conn)
 	assert.NoError(err)
