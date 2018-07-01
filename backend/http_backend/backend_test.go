@@ -1,4 +1,4 @@
-package web_pusher
+package http_backend
 
 import (
 	"testing"

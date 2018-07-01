@@ -1,4 +1,4 @@
-package web_pusher
+package stdout_logger
 
 import "log"
 

@@ -53,7 +53,7 @@ func (s *Server) OnlineConnections() int {
 	return s.onlineConnection
 }
 
-func (s *Server) sendToUser(userId string, msg []byte) {
+func (s *Server) SendToUser(userId string, msg []byte) {
 	if user, ok := s.users[userId]; ok {
 		user.Send(msg)
 	}

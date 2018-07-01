@@ -1,10 +1,11 @@
-package web_pusher
+package http_backend
 
 import (
 	"net/http"
 	"strings"
 	"bytes"
 	"time"
+	"github.com/abonec/web_pusher/logger/stdout_logger"
 )
 
 type backend struct {
@@ -14,7 +15,7 @@ type backend struct {
 
 func NewBackend(server *Server, logger Logger) *backend {
 	if logger == nil {
-		logger = NopeLogger{}
+		logger = stdout_logger.NopeLogger{}
 	}
 	return &backend{server, logger}
 }
@@ -36,7 +37,7 @@ func (b *backend) SendToUser(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	b.server.sendToUser(userId, buf.Bytes())
+	b.server.SendToUser(userId, buf.Bytes())
 	statusCode = http.StatusOK
 	rw.WriteHeader(http.StatusOK)
 }

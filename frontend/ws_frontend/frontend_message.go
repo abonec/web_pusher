@@ -1,4 +1,4 @@
-package web_pusher
+package ws_frontend
 
 type FrontendMessage struct {
 	MsgType    string            `json:"type"`

@@ -1,4 +1,4 @@
-package web_pusher
+package ws_frontend
 
 import (
 	"net/http/httptest"
