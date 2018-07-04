@@ -8,6 +8,21 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/go-redis/redis"
+  packages = [
+    ".",
+    "internal",
+    "internal/consistenthash",
+    "internal/hashtag",
+    "internal/pool",
+    "internal/proto",
+    "internal/singleflight",
+    "internal/util"
+  ]
+  revision = "83fb42932f6145ce52df09860384a4653d2d332a"
+  version = "v6.12.0"
+
+[[projects]]
   name = "github.com/gorilla/websocket"
   packages = ["."]
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
@@ -28,9 +43,7 @@
 [[projects]]
   name = "github.com/stretchr/testify"
   packages = [
-    ".",
     "assert",
-    "http",
     "mock"
   ]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
@@ -39,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "106680277cc73464c761e267ca09a6edfe8dd72d8852865918229e3358ebe084"
+  inputs-digest = "a6050137d2f69366ad00c37c6b135fb1e54c28a501faf0a268470d86db28854b"
   solver-name = "gps-cdcl"
   solver-version = 1

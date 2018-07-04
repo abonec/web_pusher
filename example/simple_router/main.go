@@ -7,13 +7,21 @@ import (
 	"github.com/abonec/web_pusher/logger/stdout_logger"
 	"net/http"
 	"log"
+	"github.com/abonec/web_pusher/backend/redis_pubsub"
 )
 
 func main() {
 	server := web_pusher.NewServer(&App{})
 	server.Start()
 
-	back := http_backend.NewBackend(server, stdout_logger.StandardLogger{})
+	logger := stdout_logger.StandardLogger{}
+
+	back := http_backend.NewBackend(server, logger)
+	redisBack := redis_pubsub.NewBackend(server, logger)
+	err := redisBack.Start("sendToActor:*")
+	if err != nil {
+		logger.Printf("error while starting redis pubsub: %s", err)
+	}
 	front := ws_frontend.NewFrontend(server, stdout_logger.StandardLogger{})
 
 	http.HandleFunc("/send-to-actor/", back.SendToUser)
