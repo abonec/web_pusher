@@ -134,8 +134,8 @@ func (s *Server) leave(leave Leave) {
 	defer close(leave.result)
 	if set, ok := s.users[leave.user.Id()]; ok {
 		set.DeleteUser(leave.user)
+		s.onlineConnection -= 1
 	}
-	s.onlineConnection -= 1
 }
 
 func (u *user) Id() string {

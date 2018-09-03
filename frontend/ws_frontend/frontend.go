@@ -10,6 +10,11 @@ import (
 	"github.com/abonec/web_pusher/application"
 )
 
+const (
+	pongWait = 30 * time.Second
+	pingWait = (pongWait * 8) / 10 // should be less than pongWait
+)
+
 type Frontend struct {
 	server *web_pusher.Server
 	logger logger.Logger
@@ -55,7 +60,7 @@ func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 		front.logf(logger.VERBOSE_LOGGING, "Error while reading auth message: %s", err.Error())
 		return
 	}
-	conn.SetReadDeadline(time.Time{})
+	conn.SetReadDeadline(time.Now().Add(pongWait))
 
 	ws := NewWebSocketConnection(conn, front)
 	u, err := front.server.Auth(ws, message)
@@ -68,17 +73,46 @@ func (front *Frontend) Handle(w http.ResponseWriter, r *http.Request) {
 	front.logf(logger.VERBOSE_LOGGING, "Authentication successful for user id #%s, online %d/%d", u.Id(), front.server.OnlineUsers(), front.server.OnlineConnections())
 	conn.WriteJSON(NewFrontendSuccessMessage(u.Id()))
 	conn.SetCloseHandler(func(code int, text string) error {
-		front.server.Close(u)
-		front.logf(logger.VERBOSE_LOGGING, "Connection for #%s(%s) was closed, online %d/%d", u.Id(), conn.RemoteAddr(), front.server.OnlineUsers(), front.server.OnlineConnections())
+		closeConnection(conn, front, u)
 		return nil
 	})
+
+	conn.SetPongHandler(func(appData string) error {
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	shutdownPinger := make(chan interface{})
+	go func() {
+		t := time.Tick(pingWait)
+
+		for {
+			select {
+			case <-t:
+				err := conn.WriteMessage(websocket.PingMessage, nil)
+				if err != nil {
+					closeConnection(conn, front, u)
+					return
+				}
+			case <-shutdownPinger:
+				return
+			}
+		}
+	}()
 
 	for {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
+			close(shutdownPinger)
+			closeConnection(conn, front, u)
 			break
 		}
 	}
+}
+
+func closeConnection(conn *websocket.Conn, front *Frontend, u application.User) {
+	front.server.Close(u)
+	front.logf(logger.VERBOSE_LOGGING, "Connection for #%s(%s) was closed, online %d/%d", u.Id(), conn.RemoteAddr(), front.server.OnlineUsers(), front.server.OnlineConnections())
 }
 
 func (front *Frontend) logf(logLevel int, format string, v ...interface{}) {
