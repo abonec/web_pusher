@@ -1,19 +1,19 @@
 package redis_pubsub
 
 import (
-	"github.com/abonec/web_pusher"
-	"github.com/go-redis/redis"
 	"github.com/abonec/web_pusher/logger"
+	"github.com/abonec/web_pusher/server"
+	"github.com/go-redis/redis"
 	"strings"
 )
 
 type Backend struct {
-	server      *web_pusher.Server
+	server      *server.Server
 	redisClient *redis.Client
 	logger      logger.Logger
 }
 
-func NewBackend(server *web_pusher.Server, logger logger.Logger) *Backend {
+func NewBackend(server *server.Server, logger logger.Logger) *Backend {
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set

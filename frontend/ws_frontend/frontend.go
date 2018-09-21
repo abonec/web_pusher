@@ -1,13 +1,13 @@
 package ws_frontend
 
 import (
-	"net/http"
-	"github.com/gorilla/websocket"
-	"time"
-	"github.com/abonec/web_pusher"
+	"github.com/abonec/web_pusher/application"
 	"github.com/abonec/web_pusher/logger"
 	"github.com/abonec/web_pusher/logger/nope_logger"
-	"github.com/abonec/web_pusher/application"
+	"github.com/abonec/web_pusher/server"
+	"github.com/gorilla/websocket"
+	"net/http"
+	"time"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 )
 
 type Frontend struct {
-	server *web_pusher.Server
+	server *server.Server
 	logger logger.Logger
 }
 
@@ -26,7 +26,7 @@ type WebSocketConnection struct {
 	user     application.User
 }
 
-func NewFrontend(server *web_pusher.Server, logger logger.Logger) *Frontend {
+func NewFrontend(server *server.Server, logger logger.Logger) *Frontend {
 	if logger == nil {
 		logger = nope_logger.NopeLogger{}
 	}

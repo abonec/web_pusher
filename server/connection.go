@@ -1,4 +1,4 @@
-package web_pusher
+package server
 
 type Connection interface {
 	Send(msg []byte) bool

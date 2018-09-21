@@ -1,10 +1,10 @@
-package web_pusher
+package server
 
 import (
-	"testing"
+	"github.com/abonec/web_pusher/test_app"
 	"github.com/stretchr/testify/assert"
 	_ "github.com/stretchr/testify/mock"
-	"github.com/abonec/web_pusher/test_app"
+	"testing"
 )
 
 func TestServer_Auth(t *testing.T) {

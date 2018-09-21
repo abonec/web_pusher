@@ -1,9 +1,9 @@
 package test_app
 
 import (
-	"github.com/stretchr/testify/mock"
 	"errors"
 	"github.com/abonec/web_pusher/application"
+	"github.com/stretchr/testify/mock"
 )
 
 type testApp struct {

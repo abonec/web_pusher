@@ -1,21 +1,21 @@
 package http_backend
 
 import (
-	"net/http"
-	"strings"
 	"bytes"
-	"time"
-	"github.com/abonec/web_pusher"
 	"github.com/abonec/web_pusher/logger"
 	"github.com/abonec/web_pusher/logger/nope_logger"
+	"github.com/abonec/web_pusher/server"
+	"net/http"
+	"strings"
+	"time"
 )
 
 type backend struct {
-	server *web_pusher.Server
+	server *server.Server
 	logger logger.Logger
 }
 
-func NewBackend(server *web_pusher.Server, logger logger.Logger) *backend {
+func NewBackend(server *server.Server, logger logger.Logger) *backend {
 	if logger == nil {
 		logger = nope_logger.NopeLogger{}
 	}

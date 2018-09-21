@@ -1,10 +1,10 @@
-package web_pusher
+package server
 
 import (
 	"errors"
+	"github.com/abonec/web_pusher/application"
 	_ "github.com/gorilla/websocket"
 	_ "github.com/stretchr/objx"
-	"github.com/abonec/web_pusher/application"
 )
 
 var (
@@ -155,4 +155,3 @@ type user struct {
 func NewUser(id string, conn Connection) *user {
 	return &user{id, conn}
 }
-

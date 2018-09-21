@@ -1,4 +1,4 @@
-package web_pusher
+package server
 
 import "github.com/abonec/web_pusher/application"
 

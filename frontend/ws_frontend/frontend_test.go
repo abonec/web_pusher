@@ -1,14 +1,14 @@
 package ws_frontend
 
 import (
-	"net/http/httptest"
+	"github.com/abonec/web_pusher/server"
+	"github.com/abonec/web_pusher/test_app"
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"testing"
-	"github.com/gorilla/websocket"
+	"net/http/httptest"
 	"strings"
-	"github.com/abonec/web_pusher"
-	"github.com/abonec/web_pusher/test_app"
+	"testing"
 )
 
 type testHandler struct {
@@ -18,7 +18,7 @@ type testHandler struct {
 type testServer struct {
 	*httptest.Server
 	url       string
-	appServer *web_pusher.Server
+	appServer *server.Server
 }
 
 func (h *testHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func (h *testHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 func newFrontendServer(assert *assert.Assertions) *testServer {
 	testSrv := &testServer{}
 	app := test_app.NewTestApp()
-	appServer := web_pusher.NewServer(app)
+	appServer := server.NewServer(app)
 	err := appServer.Start()
 	assert.NoError(err)
 	front := NewFrontend(appServer, nil)

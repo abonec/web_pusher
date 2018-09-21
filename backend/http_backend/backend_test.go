@@ -1,22 +1,21 @@
 package http_backend
 
 import (
-	"testing"
+	"bytes"
+	"github.com/abonec/web_pusher/server"
+	"github.com/abonec/web_pusher/test_app"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"bytes"
-	"github.com/abonec/web_pusher"
-	"github.com/abonec/web_pusher/test_app"
+	"testing"
 )
 
 func TestBackend_sendToUser(t *testing.T) {
 	assert := assert.New(t)
-	server := web_pusher.NewServer(test_app.NewTestApp())
+	server := server.NewServer(test_app.NewTestApp())
 	server.Start()
 	assert.NotNil(1)
 	backend := NewBackend(server, nil)
-
 
 	req := newSendToUserRequest(t, "testUser", []byte{})
 	rr := httptest.NewRecorder()

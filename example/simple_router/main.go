@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/abonec/web_pusher"
 	"github.com/abonec/web_pusher/backend/http_backend"
 	"github.com/abonec/web_pusher/backend/redis_pubsub"
 	"github.com/abonec/web_pusher/frontend/ws_frontend"
 	"github.com/abonec/web_pusher/logger/stdout_logger"
+	"github.com/abonec/web_pusher/server"
 	"log"
 	"net/http"
 )
 
 func main() {
-	server := web_pusher.NewServer(&App{})
+	server := server.NewServer(&App{})
 	server.Start()
 
 	logger := stdout_logger.StandardLogger{}
