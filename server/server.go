@@ -29,6 +29,7 @@ type Server struct {
 	joins            chan Join
 	leaves           chan Leave
 	onlineConnection int
+	monitoring       Monitoring
 }
 
 func NewServer(app application.Application) *Server {
@@ -39,6 +40,7 @@ func NewServer(app application.Application) *Server {
 		channels:    make(map[string]PushChannel),
 		joins:       make(chan Join),
 		leaves:      make(chan Leave),
+		monitoring:  blankMonitoring{},
 	}
 }
 
@@ -51,7 +53,9 @@ func (s *Server) OnlineConnections() int {
 }
 
 func (s *Server) SendToUser(userId string, msg []byte) {
+	s.monitoring.SendToActor(len(msg))
 	if user, ok := s.users[userId]; ok {
+		s.monitoring.SendToConnection(len(msg))
 		user.Send(msg)
 	}
 }
@@ -108,11 +112,14 @@ func (s *Server) join(join Join) {
 		userSet = NewUserSet(join.user)
 		userSet.OnLastConnection(func() {
 			delete(s.users, join.user.Id())
+			s.monitoring.LeaveActor()
 		})
 		s.users[join.user.Id()] = userSet
+		s.monitoring.JoinActor()
 	} else {
 		userSet.AddUser(join.user)
 	}
+	s.monitoring.JoinConnection()
 	s.onlineConnection += 1
 	for _, channel := range *join.channels {
 		pushChannel, ok := s.channels[channel]
@@ -135,6 +142,7 @@ func (s *Server) leave(leave Leave) {
 	if set, ok := s.users[leave.user.Id()]; ok {
 		set.DeleteUser(leave.user)
 		s.onlineConnection -= 1
+		s.monitoring.LeaveConnection()
 	}
 }
 
